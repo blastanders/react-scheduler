@@ -8,6 +8,7 @@ import EmptyBox from "../EmptyBox";
 import { Grid, Header, LeftColumn, Tooltip } from "..";
 import { CalendarProps } from "./types";
 import { StyledOuterWrapper, StyledInnerWrapper, StyledEmptyBoxWrapper } from "./styles";
+import { getEmptyClickData } from "@/utils/getEmptyClickData";
 
 const initialTooltipData: TooltipData = {
   coords: { x: 0, y: 0 },
@@ -22,6 +23,7 @@ const initialTooltipData: TooltipData = {
 export const Calendar: FC<CalendarProps> = ({
   data,
   onTileClick,
+  onEmptyCellClick,
   onItemClick,
   toggleTheme,
   topBarWidth
@@ -71,6 +73,37 @@ export const Calendar: FC<CalendarProps> = ({
           zoom,
           includeTakenHoursOnWeekendsInDayView
         );
+
+        setTooltipData({ coords: { x, y }, resourceIndex, disposition });
+        setIsVisible(true);
+      },
+      300
+    )
+  );
+  const debouncedhandleEmptyClick = useRef(
+    debounce(
+      (
+        e: MouseEvent,
+        startDate: Day,
+        rowsPerItem: number[],
+        projectsPerPerson: SchedulerProjectData[][][],
+        zoom: ZoomLevel
+      ) => {
+        if (!gridRef.current) return;
+        const { left, top } = gridRef.current.getBoundingClientRect();
+        const tooltipCoords = { x: e.clientX - left, y: e.clientY - top };
+        const {
+          coords: { x, y },
+          resourceIndex,
+          disposition
+        } = getEmptyClickData(
+          startDate,
+          tooltipCoords,
+          rowsPerItem,
+          projectsPerPerson,
+          zoom,
+          includeTakenHoursOnWeekendsInDayView
+        );
         setTooltipData({ coords: { x, y }, resourceIndex, disposition });
         setIsVisible(true);
       },
@@ -101,19 +134,27 @@ export const Calendar: FC<CalendarProps> = ({
     setTooltipData(initialTooltipData);
   }, []);
 
+
+
+
   useEffect(() => {
     const handleMouseOver = (e: MouseEvent) =>
       debouncedHandleMouseOver.current(e, startDate, rowsPerItem, projectsPerPerson, zoom);
+
+    const handleEmptyClick = (e: MouseEvent) =>
+      debouncedhandleEmptyClick.current(e, startDate, rowsPerItem, projectsPerPerson, zoom);
     const gridArea = gridRef.current;
 
     if (!gridArea) return;
 
     gridArea.addEventListener("mousemove", handleMouseOver);
     gridArea.addEventListener("mouseleave", handleMouseLeave);
+    gridArea.addEventListener("click", handleEmptyClick);
 
     return () => {
       gridArea.removeEventListener("mousemove", handleMouseOver);
       gridArea.removeEventListener("mouseleave", handleMouseLeave);
+      gridArea.removeEventListener("click", handleEmptyClick);
     };
   }, [debouncedHandleMouseOver, handleMouseLeave, projectsPerPerson, rowsPerItem, startDate, zoom]);
 

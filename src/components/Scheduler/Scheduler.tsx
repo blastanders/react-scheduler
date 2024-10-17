@@ -78,7 +78,8 @@ const Scheduler = ({
             onRangeChange={onRangeChange}
             defaultStartDate={defaultStartDate}
             onFilterData={onFilterData}
-            onClearFilterData={onClearFilterData}>
+            onClearFilterData={onClearFilterData}
+          >
             <StyledOutsideWrapper
               showScroll={!!data.length}
               id={outsideWrapperId}

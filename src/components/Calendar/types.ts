@@ -4,6 +4,7 @@ export type CalendarProps = {
   data: SchedulerData;
   topBarWidth: number;
   onTileClick?: (data: SchedulerProjectData) => void;
+  onEmptyCellClick?: () => void;
   onItemClick?: (data: SchedulerItemClickData) => void;
   toggleTheme?: () => void;
 };

@@ -5,6 +5,7 @@ export type GridProps = {
   rows: number;
   data: PaginatedSchedulerData;
   onTileClick?: (data: SchedulerProjectData) => void;
+  onEmptyCellClick?: () => void;
 };
 
 export type StyledSpanProps = {
